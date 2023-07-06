@@ -1,0 +1,253 @@
+* {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    padding: 0%;
+    margin: 0%;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    display: none;
+}
+
+.fd {
+    width: 100%;
+    float: left;
+    position: relative;
+}
+
+.h_b_g {
+    height: 160px;
+    background: rgb(14, 117, 235);
+}
+
+.head_pay {
+    color: rgb(255, 255, 255);
+    padding: 45px;
+}
+
+.h_b_g {
+    height: 160px;
+    background: rgb(14, 117, 235);
+}
+
+.trans_div {
+    margin-top: 20px;
+}
+
+.trans_sub_div {
+    width: fit-content;
+    margin: auto;
+    margin-top: 10px;
+}
+
+input[type=number] {
+    padding: 7px;
+}
+
+.qr_div {
+    margin-top: 5px;
+}
+
+
+button {
+
+    padding: 8px;
+    color: #fff;
+    background: #0e75eb;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    text-transform: capitalize;
+    cursor: pointer;
+    box-shadow: 1px 1px 5px 1px #8080806b;
+
+}
+
+
+@media only screen and (max-width: 600px) {
+    .h_b_g {
+        height: 160px;
+        background: rgb(14, 117, 235);
+    }
+
+    .head_pay {
+        color: rgb(255, 255, 255);
+        padding: 45px;
+    }
+
+    .head {
+        font-size: 18px;
+    }
+
+    .amount_div {
+        box-shadow: rgba(128, 128, 128, 0.365) 2px 2px 9px 2px;
+        margin: 0px 30px 30px;
+        padding: 20px;
+        background: rgb(255, 255, 255);
+    }
+
+    p {
+        font-size: 13px;
+        padding: 0px 0px 5px;
+    }
+
+    .qr_main {
+        color: gray;
+        width: fit-content;
+        padding-top: 70px;
+        margin: auto;
+    }
+
+    .qr_main small {
+        font-size: 11px;
+    }
+
+    .qr_div {
+        margin: auto;
+        border-width: 1px;
+        border-style: solid;
+        border-color: gray;
+        border-image: initial;
+        border-radius: 3px;
+    }
+
+}
+
+@media only screen and (min-width: 600px) {
+    .h_b_g {
+        height: 160px;
+        background: rgb(14, 117, 235);
+    }
+
+    .head_pay {
+        color: rgb(255, 255, 255);
+        padding: 45px;
+    }
+
+    .amount_div {
+        box-shadow: rgba(128, 128, 128, 0.365) 2px 2px 9px 2px;
+        margin: 0px 50px 30px;
+        padding: 20px;
+        background: rgb(255, 255, 255);
+    }
+
+    p {
+        font-size: 15px;
+        padding: 0px 0px 5px;
+    }
+
+    .qr_main {
+        color: gray;
+        width: fit-content;
+        padding-top: 70px;
+        margin: auto;
+    }
+
+    .qr_div {
+        margin: auto;
+        border-width: 1px;
+        border-style: solid;
+        border-color: gray;
+        border-image: initial;
+        border-radius: 3px;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    .h_b_g {
+        height: 160px;
+        background: rgb(14, 117, 235);
+    }
+
+    .head_pay {
+        color: rgb(255, 255, 255);
+        padding: 45px;
+    }
+
+    .head {
+        font-size: 18px;
+    }
+
+    p {
+        padding: 0px 0px 5px;
+    }
+
+    .qr_main {
+        color: gray;
+        width: fit-content;
+        padding-top: 70px;
+        margin: auto;
+    }
+
+    .qr_div {
+        margin: auto;
+        border-width: 1px;
+        border-style: solid;
+        border-color: gray;
+        border-image: initial;
+        border-radius: 3px;
+    }
+}
+
+@media only screen and (min-width: 992px) {
+    .h_b_g {
+        height: 160px;
+        background: rgb(14, 117, 235);
+    }
+
+    .head_pay {
+        color: rgb(255, 255, 255);
+        padding: 45px;
+    }
+
+    .head_pay {
+        color: rgb(255, 255, 255);
+        padding: 45px;
+    }
+
+    .head {
+        font-size: 18px;
+    }
+
+    p {
+        padding: 0px 0px 5px;
+    }
+
+    .qr_main {
+        color: gray;
+        width: fit-content;
+        padding-top: 70px;
+        margin: auto;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    .h_b_g {
+        height: 160px;
+        background: rgb(14, 117, 235);
+    }
+
+    .head {
+        font-size: 18px;
+    }
+
+    p {
+        padding: 0px 0px 5px;
+    }
+
+    .qr_main {
+        color: gray;
+        padding: 74px 500px 20px;
+    }
+
+    .qr_div {
+        margin: auto;
+        border-width: 1px;
+        border-style: solid;
+        border-color: gray;
+        border-image: initial;
+        border-radius: 3px;
+    }
+}

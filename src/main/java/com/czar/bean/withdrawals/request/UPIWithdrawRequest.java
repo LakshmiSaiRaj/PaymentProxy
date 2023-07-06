@@ -1,11 +1,14 @@
 package com.czar.bean.withdrawals.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @lombok.Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class UPIWithdrawRequest {
   private int amount;
   private String account_name;

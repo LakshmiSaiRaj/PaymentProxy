@@ -12,7 +12,7 @@
 	<artifactId>payments</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>payments</name>
-	<description>proxy paymentgateway</description>
+	<description>Payment Processor Gateway</description>
 	<properties>
 		<java.version>11</java.version>
 	</properties>

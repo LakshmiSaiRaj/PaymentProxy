@@ -1,5 +1,6 @@
 package com.czar.controller;
 
+
 import com.czar.service.ICommonCashierService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
@@ -20,9 +21,12 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
@@ -34,6 +38,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import com.google.gson.Gson;
+
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @Controller
 @RequestMapping("/deposit")
@@ -44,37 +56,93 @@ public class DepositController {
 
     @GetMapping(value = "/redirect", produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    public ModelAndView redirect1(@RequestParam Map<String, String> map) {
+    public RedirectView redirect1(@RequestParam Map<String, String> map) {
         String s = null;
 
-        logger.info("Paykassma URL params : " + map);
+        logger.info("Reached /redirect URL with params : " + map);
+        JSONObject jsonDbRes = null;
+        JSONObject jdata = null;
+        Boolean page = null;
+        Boolean api = null;
+        Boolean success = null;
+        String url = null;
+
         RedirectView redirectView = new RedirectView();
         if (map != null) {
             logger.info("findBySeqNoAndstate() function i/p parameters " + map);
             s = cashierService.geturlbyseqnoandstate(String.valueOf(map.get("seque_no")), String.valueOf(map.get("wsession")));
-            logger.info("response data : " + s);
-
+            logger.info("DB response data : " + s);
             try {
-                JSONObject jsonObject = new JSONObject(s);
-                JSONObject data = null;
-                if (jsonObject.get("status").equals("success")) {
-                    s = String.valueOf(jsonObject.get("data"));
-                    jsonObject = (JSONObject) jsonObject.get("data");
+                jsonDbRes = new JSONObject(s);
 
-                    logger.info("Redirect request ->" + s + "URL :" + jsonObject);
-                    data = new JSONObject(String.valueOf(jsonObject));
+                if (jsonDbRes.get("status").equals("success") || !jsonDbRes.toString().isEmpty()) {
+                    jdata = (JSONObject) jsonDbRes.get("data");
+                    logger.info("DB RESPONSE JSON   : --> " + jsonDbRes);
+                    logger.info("DATA JSON          : --> " + jdata);
+                    success = true;
                 } else {
+                    success = false;
                     logger.info("status false");
+                    redirectView.setUrl("error2");
+                    return redirectView;
                 }
-                String url = data.getString("url");
-                logger.info("response url : " + url + "request method");
-                redirectView.setUrl(url);
-                logger.info("PayKassma redirection failed" + url);
+
+//        logger.info( " Outside DATA : " + jsonDbRes.get("redirect_url") ) ;
+
+                if (jdata.has("redirect_url")) {
+                    url = (String) jdata.get("redirect_url");
+                    logger.info("Redirect to url Page : " + url + " with request method " + jdata.get("httpmethod"));
+                    redirectView.setUrl(url);
+                    return redirectView;
+                } else {
+                    url = (String) jsonDbRes.get("redirect_url");
+                    logger.info("OTHER Redirect to url : " + url + " request method " + jsonDbRes.get("httpmethod").toString());
+                    String Authorization = jsonDbRes.get("Authorization").toString();
+                    String Signature = null;
+                    try {
+                        Signature = hashPayload(jdata.toString(), jsonDbRes.get("signature").toString());
+                    } catch (NoSuchAlgorithmException e) {
+                        success = false;
+                        logger.info("status false");
+                        redirectView.setUrl("error2");
+                        return redirectView;
+                    } catch (InvalidKeyException e) {
+                        success = false;
+                        logger.info("status false");
+                        redirectView.setUrl("error2");
+                        return redirectView;
+                    }
+                    RestTemplate restTemplate = new RestTemplate();
+                    org.springframework.http.HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    headers.add("Authorization", "Basic " + Authorization);
+                    headers.add("signature", Signature);
+                    logger.info("Headers : " + headers);
+
+                    org.springframework.http.HttpEntity<String> request =
+                            new org.springframework.http.HttpEntity<String>(jdata.toString(), headers);
+
+                    logger.info("Request : " + request);
+                    String res = restTemplate.postForObject(url, request, String.class);
+                    logger.info("Response from Partner : " + res);
+
+                    JSONObject jsonRes = null;
+                    try {
+                        jsonRes = new JSONObject(res);
+                        url = jsonRes.getString("redirect_url");
+                        redirectView.setUrl("url");
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                logger.info(" redirection Reached here for URL " + url);
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
         }
-        return new ModelAndView(redirectView);
+        logger.info("Redirect View TO ===> " + url);
+        redirectView.setUrl(url);
+        return redirectView;
     }
 
     @GetMapping(value = "/payUrl", produces = MediaType.TEXT_HTML_VALUE)
@@ -89,7 +157,7 @@ public class DepositController {
         if (map != null) {
             logger.info("findBySeqNoAndstate() function i/p parameters " + map);
             responseURL = cashierService.geturlbyseqnoandstate(String.valueOf(map.get("seque_no")), String.valueOf(map.get("wsession")));
-            logger.info("response data : " + responseURL);
+            logger.info("DB response data : " + responseURL);
             String imageData = null;
             try {
                 JSONObject jsonObject = new JSONObject(responseURL);
@@ -102,8 +170,6 @@ public class DepositController {
                 } else {
                     logger.info("status false");
                 }
-           /*     String url = data.getString("url");
-                logger.info("response url : " + url);*/
                 String payMethod = data.getString("payMethod");
                 String params = String.valueOf(jsonObject.get("params"));
                 jsonObject = (JSONObject) jsonObject.get("params");
@@ -146,13 +212,10 @@ public class DepositController {
                         HttpURLConnection postCon = (HttpURLConnection) urlObj.openConnection();
                         postCon.setRequestMethod("POST");
                         postCon.setRequestProperty("User-Agent", "Mozilla/5.0");
-// Setting the message content type as JSON
                         postCon.setRequestProperty("Content-Type", "application/json");
                         postCon.setDoOutput(true);
-// for writing the message content to the server
                         OutputStream osObj = postCon.getOutputStream();
                         osObj.write(params.getBytes());
-// closing the output stream
                         osObj.flush();
                         osObj.close();
                         int respCode = postCon.getResponseCode();
@@ -161,10 +224,6 @@ public class DepositController {
                         System.out.println("The POST Request Response Message : " + postCon.getResponseMessage());
                         StringBuffer sb = new StringBuffer();
                         if (respCode == HttpURLConnection.HTTP_OK) {
-// reaching here means the connection has been established
-// By default, InputStream is attached to a keyboard.
-// Therefore, we have to direct the InputStream explicitly
-// towards the response of the server
                             InputStreamReader irObj = new InputStreamReader(postCon.getInputStream());
                             BufferedReader br = new BufferedReader(irObj);
                             String input = null;
@@ -174,11 +233,9 @@ public class DepositController {
                             logger.info("sb respoonse : " + sb);
                             br.close();
                             postCon.disconnect();
-// printing the response
                             System.out.println(sb.toString());
                         } else {
-// connection was not successful
-                            System.out.println("POST Request did not work.");
+                            System.out.println("POST Request did not work. Connection did not happen");
                         }
 
                         responseData = String.valueOf(sb);
@@ -190,28 +247,31 @@ public class DepositController {
                     }
                     String qrData = jsonObject.getString("UPI_QR_CODE");
                     String txnId = jsonObject.getString("TXN_ID");
+                    String orderId = jsonObject.getString("ORDER_ID");
+                    int amount = Integer.parseInt(jsonObject.getString("AMOUNT"));
+                    int amountData = amount / 100;
+
                     logger.info("BASE64 Data : " + qrData);
                     jsonObject.remove("UPI_QR_CODE");
                     String responseDataOfQRCode = cashierService.postBackHandler(String.valueOf(jsonObject));
                     logger.info("db response from postBackHandler : " + responseDataOfQRCode);
                     logger.info("BASE64 Data : " + qrData);
                     imageData = qrData;
+                    Model model = null;
+
                     responseData = "<!DOCTYPE html>\n" +
                             "<html lang=\"en\">\n" +
                             "<head>\n" +
-                            "<meta charset=\"UTF-8\">\n" +
-                            "<title>Response Data</title>\n" +
-                            "\n" +
+                            "  <meta charset=\\\"UTF-8\\\">\n" +
+                            "  <title>Response Data</title>\n" +
                             "</head>\n" +
                             "<body>\n" +
-                            "\n" +
                             "<div>\n" +
-                            "<div>TransactionId : "+ txnId +"</div>\n" +
-                            "<img src=\"data:image/jpeg;base64,\n" + imageData + '"' + "/>\n" +
+                            "  <div>TransactionId : " + txnId + "</div>\n" +
+                            "  <img src=\"data:image/jpeg;base64,\n" + imageData + '"' + "/>\n" +
                             "</div>\n" +
                             "</body>\n" +
-                            "\n" +
-                            "</html>";
+                            "</html>\n";
                 }
 
             } catch (JSONException e) {
@@ -233,17 +293,21 @@ public class DepositController {
     }
 
     @RequestMapping(value = "/transactionStatus", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String depositReceipt(@RequestBody Map<String, String> map) {
-        String rec = cashierService.getAcknowledgeRecord(map.get("seque_no"));
-        JSONObject jsonObject = null;
-        jsonObject = new JSONObject(rec);
-
-        if(jsonObject.getString("status").equalsIgnoreCase("success")){
-            return "success2";
-        }else {
-            return "error2";
+    @ResponseBody
+    public TreeNode depositReceipt(@RequestBody Map<String, String> map) {
+        logger.info("Transaction payload :  " + map);
+        String rec = cashierService.snp_depositstatusenquiry(map.get("seque_no"), map.get("txnId"));
+        logger.info("transactionStatus db response payload : " + rec);
+        JsonNode json;
+        try {
+            json = new ObjectMapper().readTree(rec);
+            logger.info("transactionStatus db response : " + json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
+        return json;
     }
+
 
     @RequestMapping(value = "/processedTransactionId", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -266,18 +330,45 @@ public class DepositController {
         return "success2";
     }
 
+
+    @GetMapping("/pending")
+    public String depositPending(String payLoad) {
+        logger.info("Redirect url request ->  https://fairpays.org/deposit/pending");
+        return "pending2";
+    }
+
+    @GetMapping("status/pending")
+    public String statusPending(String payLoad) {
+        logger.info("Redirect url request ->  https://fairpays.org/deposit/pending");
+        return "pending2";
+    }
+
     @GetMapping("/error")
-    public String error(String payLoad) {
-        logger.info("Redirect url request ->  https://fairpays.org/deposit/success");
+    public String depositError(String payLoad) {
+        logger.info("Redirect url request ->  https://fairpays.org/deposit/error");
         return "error2";
     }
 
     @GetMapping("/failure")
     public String depositFailure(String payLoad) {
-        logger.info("Redirect url request ->  https://fairpays.org/deposit/failure");
-
+        logger.info("Reached Redirect url request ->  https://fairpays.org/deposit/failure");
         return "failure2";
     }
 
+
+    public String hashPayload(String payloadJson, String apiKey) throws NoSuchAlgorithmException, InvalidKeyException {
+        logger.info("Reached hashPayload : " + payloadJson + " APIKEY : " + apiKey);
+        SecretKeySpec secretKey = new SecretKeySpec(apiKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(secretKey);
+        byte[] hash = mac.doFinal(payloadJson.getBytes(StandardCharsets.UTF_8));
+
+        StringBuilder hashString = new StringBuilder(2 * hash.length);
+        for (byte b : hash) {
+            hashString.append(String.format("%02x", b & 0xff));
+        }
+        logger.info("Sending Response from hashPayload " + hashString.toString());
+        return hashString.toString();
+    }
 
 }

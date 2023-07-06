@@ -1,5 +1,8 @@
 package com.czar.bean.withdrawals.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BankDetails {
   public String bank_code;
 

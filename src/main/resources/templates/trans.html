@@ -1,0 +1,237 @@
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PaymentGateway</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css">
+    <style>
+body {
+  margin: 0;
+  font-family: "Lato", sans-serif;
+}
+
+.sidebar {
+  margin: 0;
+  padding: 0;
+  top:0;
+  left:0;
+  z-index: 1;
+  width: 200px;
+  background-color: #f1f1f1;
+  position: auto;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.sidebar a {
+  display: block;
+  color: black;
+  padding: 16px;
+  text-decoration: none;
+}
+
+.sidebar a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.sidebar a:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+
+div.main {
+  margin-left: 200px;
+  padding: 1px 16px;
+  height: 650px;
+  margin-top: -650px;
+  overflow: auto;
+
+}
+div.mobile{
+margin-left: 5px;
+  padding: 1px 16px;
+  height: 1000px;
+  margin-top: 5px;
+  overflow: auto;
+
+}
+
+@media screen and (max-width: 700px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .sidebar a {float: left;}
+  div.content {margin-left: 0;}
+}
+
+@media screen and (max-width: 400px) {
+  .sidebar a {
+    text-align: center;
+    float: none;
+  }
+
+  @media screen and (max-height: 450px) {
+  .sidebar {padding-top: 15px;}
+  .sidebar a {font-size: 18px;}
+}
+@media (max-width: 1199.98px)
+.table-responsive-xl {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    position: absolute;
+    left: 0;
+}
+</style>
+</head>
+<body>
+<div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" >PAYMENT PROCESSOR GATEWAY</a>
+        </div>
+    </nav>
+</div>
+<div class="sidebar">
+    <a class="active">Menu</a>
+    <a th:href="@{/main}">Reports</a>
+    <ul>
+        <a th:href="@{/data}">Txn History</a>
+    </ul>
+    <ul>
+        <a th:href="@{/paymethodslist}">Methods at Partners</a>
+    </ul>
+    <a th:href="@{/login}">Logout</a>
+</div>
+
+<div class="main">
+    <div class="row">
+            <form  th:action="@{/data/filter}" method="get">
+
+            <label>Gateway:</label>
+                <select th:name="gateway">
+                    <option value="">-&#45;&#45;Select-&#45;&#45;</option>
+                    <option value="LetzPay"  th:selected="${gateway == 'LetzPay'}">LetzPay</option>
+                    <option value="Paykassama" th:selected="${gateway == 'Paykassama'}">Paykassama</option>
+                    <option value="Buxxpress"  th:selected="${gateway == 'Buxxpress'}">Buxxpress</option>
+                </select>
+                &nbsp
+            <label >Payment Method:</label>
+                <select th:name="paymentMethod" >
+                    <option value="">-&#45;&#45;Select-&#45;&#45;</option>
+                    <option value="phone_pe" th:selected="${paymentMethod == 'phone_pe'}">phone_pe</option>
+                    <option value="Paytm" th:selected="${paymentMethod == 'Paytm'}">Paytm</option>
+                    <option value="imps_ib" th:selected="${paymentMethod == 'imps_ib'}">imps_ib</option>
+                    <option value="ScanNPay" th:selected="${paymentMethod == 'ScanNPay'}">ScanNPay</option>
+                    <option value="SCANNPAY" th:selected="${paymentMethod == 'SCANNPAY'}">SCANNPAY</option>
+                    <option value="PayTm" th:selected="${paymentMethod == 'PayTm'}">PayTm</option>
+                    <option value="UPI" th:selected="${paymentMethod == 'UPI'}">UPI</option>
+                    <option value="paytm" th:selected="${paymentMethod == 'paytm'}">paytm</option>
+                    <option value="UPI_S" th:selected="${paymentMethod == 'UPI_S'}">UPI_S</option>
+                </select>
+            &nbsp
+
+            <label>Transaction Type:</label>
+            <select th:name="transactionType" >
+                <option value="">-&#45;&#45;Select-&#45;&#45;</option>
+                <option value="Deposit" th:selected="${transactionType == 'Deposit'}">Deposit</option>
+                <option value="Withdraw" th:selected="${transactionType == 'Withdraw'}">Withdraw</option>
+            </select>
+            &nbsp
+
+
+            <label>State:</label>
+            <select th:name="state" >
+                <option value="">---Select---</option>
+                <option value="fail" th:selected="${state == 'fail'}">Fail</option>
+                <option value="ok" th:selected="${state == 'ok'}">OK</option>
+                <option value="Success" th:selected="${state == 'Success'}">Success</option>
+                <option value="Initiated" th:selected="${state == 'Initiated'}">Initiated</option>
+                <option value="Started" th:selected="${state == 'Started'}">Started</option>
+                <option value="At Gateway" th:selected="${state == 'At Gateway'}">At Gateway</option>
+            </select>
+
+            <input type="submit" class="btn btn-primary" value="Submit"/>
+            <!--<input type="button" value="Reset" class="btn btn-warning" th:href="@{/data}" />-->
+                <a th:href="@{/data}" class="btn btn-warning">Reset</a>
+        </form>
+        <table id="paganation" class="table table-striped" >
+            <thead class="thead-light">
+            <tr>
+                <th>Id</th>
+                <th>Start Date</th>
+                <th>Domain</th>
+                <th>Login Name</th>
+                <th>Gateway</th>
+                <th>Transaction Id</th>
+                <th>Transaction Type</th>
+                <th>Transaction Amount</th>
+                <th>State</th>
+                <th>Payment Method</th>
+                <th>Before Amount</th>
+                <th>After Amount</th>
+                <th>User Id</th>
+                <th>Hit Count</th>
+                <th>Sequence NO</th>
+                <th>End Date</th>
+                <th>Last Function</th>
+                <th>Wsession</th>
+                <th>Request Received</th>
+                <th>Request Send</th>
+                <th>Response Received</th>
+                <th>Response Send</th>
+                <th>Postback Request</th>
+                <th>Postback Response</th>
+            </tr>
+            </thead>
+            <tbody >
+            <tr th:each="transaction: ${transactions}">
+                <td>[[${transaction.id}]]</td>
+                <td>[[${transaction.startDate}]]</td>
+                <td>[[${transaction.domain}]]</td>
+                <td>[[${transaction.loginName}]]</td>
+                <td>[[${transaction.gateway}]]</td>
+                <td>[[${transaction.transactionId}]]</td>
+                <td>[[${transaction.transactionType}]]</td>
+                <td>[[${transaction.trnxAmount}]]</td>
+                <td>[[${transaction.state}]]</td>
+                <td>[[${transaction.paymentMethod}]]</td>
+                <td>[[${transaction.balanceBefore}]]</td>
+                <td>[[${transaction.balanceAfter}]]</td>
+                <td>[[${transaction.userId}]]</td>
+                <td>[[${transaction.hitCount}]]</td>
+                <td>[[${transaction.sequeNo}]]</td>
+                <td>[[${transaction.endDate}]]</td>
+                <td>[[${transaction.lastFunc}]]</td>
+                <td>[[${transaction.wsession}]]</td>
+                <td>[[${transaction.reqReceived}]]</td>
+                <td>[[${transaction.reqSend}]]</td>
+                <td>[[${transaction.resReceived}]]</td>
+                <td>[[${transaction.resSend}]]</td>
+                <td>[[${transaction.postbackReq}]]</td>
+                <td>[[${transaction.postbackRes}]]</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<script  src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script  src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script  src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script  src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+<script  src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+        $(document).ready(function() {
+            $('#paganation').DataTable();
+        });
+    </script>
+</body>
+</html>

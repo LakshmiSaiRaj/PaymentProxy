@@ -1,0 +1,168 @@
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PaymentGateway</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css">
+    <style>
+body {
+  margin: 0;
+  font-family: "Lato", sans-serif;
+}
+
+.sidebar {
+  margin: 0;
+  padding: 0;
+  top:0;
+  left:0;
+  z-index: 1;
+  width: 200px;
+  background-color: #f1f1f1;
+  position: auto;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.sidebar a {
+  display: block;
+  color: black;
+  padding: 16px;
+  text-decoration: none;
+}
+
+.sidebar a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.sidebar a:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+
+div.main {
+  margin-left: 200px;
+  padding: 1px 16px;
+  height: 650px;
+  margin-top: -650px;
+  overflow: auto;
+
+}
+div.mobile{
+margin-left: 5px;
+  padding: 1px 16px;
+  height: 1000px;
+  margin-top: 5px;
+  overflow: auto;
+
+}
+
+@media screen and (max-width: 700px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .sidebar a {float: left;}
+  div.content {margin-left: 0;}
+}
+
+@media screen and (max-width: 400px) {
+  .sidebar a {
+    text-align: center;
+    float: none;
+  }
+
+  @media screen and (max-height: 450px) {
+  .sidebar {padding-top: 15px;}
+  .sidebar a {font-size: 18px;}
+}
+@media (max-width: 1199.98px)
+.table-responsive-xl {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    position: absolute;
+    left: 0;
+}
+</style>
+</head>
+<body>
+<div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" >PAYMENT PROCESSOR GATEWAY</a>
+        </div>
+    </nav>
+</div>
+<div class="sidebar">
+    <a class="active">Menu</a>
+    <a th:href="@{/main}">Reports</a>
+    <ul>
+        <a th:href="@{/data}">Txn History</a>
+    </ul>
+    <ul>
+        <a th:href="@{/paymethodslist}">Methods at Partners</a>
+    </ul>
+    <a th:href="@{/login}">Logout</a>
+</div>
+
+<div class="main">
+    <div class="row">
+        <table id="paganation" class="table table-striped" >
+            <thead class="thead-light">
+            <tr>
+                <th>Id</th>
+                <th>Gateway</th>
+                <th>Pay Method</th>
+                <th>Status</th>
+                <th>Req URL</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody >
+            <tr th:each="paymethodAtgateway: ${paymethodsAtgateway}">
+
+                <td> [[${paymethodAtgateway.id}]]              </td>
+                <td> [[${paymethodAtgateway.gateway}]]         </td>
+                <td> [[${paymethodAtgateway.payment_method}]]  </td>
+                <td> [[${paymethodAtgateway.is_active}]]       </td>
+                <td> [[${paymethodAtgateway.req_url}]]       </td>
+                <td>
+                    <span th:if="${paymethodAtgateway.is_active }">
+                        <button type="button"    onclick="myFunction1()">InActivate</button>
+                    </span>
+                    <span th:unless="${paymethodAtgateway.is_active}">
+                        <button type="button" onclick="myFunction2()">Activate</button>
+                    </span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<script  src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script  src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script  src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script  src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+<script  src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+        $(document).ready(function() {
+            $('#paganation').DataTable();
+        });
+
+function myFunction1() {
+  alert("Hello 1 1 1");
+}
+function myFunction2(param2) {
+  alert(param2);
+}
+</script>
+
+</body>
+</html>

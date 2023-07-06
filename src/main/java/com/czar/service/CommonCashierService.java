@@ -32,9 +32,6 @@ public class CommonCashierService implements ICommonCashierService {
     @Autowired
     TransactionRepository transactionRepository;
 
-    @Value("${andromeda.depositCallBack}")
-    private String callback;
-
 
     public Response depositPostBack(PostbackBean postresponse) {
 
@@ -51,7 +48,7 @@ public class CommonCashierService implements ICommonCashierService {
 
             logger.info("data object from json: " + jsonObject);
             String domain = jsonObject.getString("domain");
-
+            String urlByDomain = jsonObject.getString("depositCallbackURL");
             if (jsonObject.get("status").equals("success")) {
                 Map<String, String> map = null;
                 String status = "ok";
@@ -61,14 +58,9 @@ public class CommonCashierService implements ICommonCashierService {
                 map1.put("status", "success");
                 map1.put("sid", shortId);
                 URL url = null;
-                String dCURL = null;
-                if(domain.equalsIgnoreCase("rrrcasino")) {
-                    dCURL = "https://rrrcasino.com/api/cashier/depositCallBack";
-                }else {
-                    dCURL = "https://777elite.com/api/cashier/depositCallBack";
-                }
+
                 try {
-                    url = new URL(dCURL);
+                    url = new URL(urlByDomain);
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
                 }
@@ -103,7 +95,7 @@ public class CommonCashierService implements ICommonCashierService {
                     throw new RuntimeException(e);
                 }
                 return new Response("ok");
-            }else {
+            } else {
                 return new Response("failed");
             }
         }
@@ -116,8 +108,24 @@ public class CommonCashierService implements ICommonCashierService {
     }
 
     @Override
+    public Boolean Deposit_handler(String sequeno, String reqLoad , String respLoad) {
+
+        return transactionRepository.Deposit_handler( sequeno,  reqLoad , respLoad);
+    }
+
+    @Override
     public String postBackHandler(String payload) {
         return transactionRepository.postBackHandler(payload);
+    }
+//    @Override
+    public String buxDepositcallback_handler(String payload) {
+        logger.info ( "buxDepositcallback_handler --------> " + payload) ;
+        return transactionRepository.buxDepositcallback_handler(payload);
+//        return payload ;
+    }
+    @Override
+    public String snp_depositstatusenquiry(String seque_no, String txnId) {
+        return transactionRepository.snp_depositstatusenquiry(seque_no, txnId);
     }
 
     @Override

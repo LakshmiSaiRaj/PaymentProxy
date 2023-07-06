@@ -1,8 +1,9 @@
 package com.czar.bean.deposits.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class Stockpiling {
     @JsonProperty("USD")
@@ -11,6 +12,8 @@ public class Stockpiling {
     public int iNR;
     @JsonProperty("EUR")
     public double eUR;
+    @JsonProperty("USDT20")
+    public double uSDT20;
     @JsonProperty("IDR")
     public double iDR;
     @JsonProperty("MYR")
@@ -41,6 +44,8 @@ public class Stockpiling {
     public double aMD;
     @JsonProperty("AOA")
     public double aOA;
+    @JsonProperty("USDTTRC20")
+    public double uSDTTRC20;
     @JsonProperty("ARS")
     public double aRS;
     @JsonProperty("AWG")

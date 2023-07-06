@@ -1,8 +1,11 @@
 package com.czar.bean.withdrawals.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class WithdrawPostbackBean {
     public String withdrawal_id;
     public String status;

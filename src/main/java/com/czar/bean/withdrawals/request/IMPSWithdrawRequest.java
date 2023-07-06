@@ -1,11 +1,13 @@
 package com.czar.bean.withdrawals.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @lombok.Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IMPSWithdrawRequest {
   private String payment_system;
   private Integer amount;
@@ -28,7 +30,9 @@ public class IMPSWithdrawRequest {
   private String payMethod;
   private String username;
   private String withdrawal_id;
-
+  private String bank_name;
+  private String bank_code;
+  private String emailid;
 
   // Getter Methods
 
@@ -191,5 +195,29 @@ public class IMPSWithdrawRequest {
 
   public void setAccount_name(String account_name) {
     this.account_name = account_name;
+  }
+
+  public String getBank_name() {
+    return bank_name;
+  }
+
+  public void setBank_name(String bank_name) {
+    this.bank_name = bank_name;
+  }
+
+  public String getBank_code() {
+    return bank_code;
+  }
+
+  public void setBank_code(String bank_code) {
+    this.bank_code = bank_code;
+  }
+
+  public String getEmailid() {
+    return emailid;
+  }
+
+  public void setEmailid(String emailid) {
+    this.emailid = emailid;
   }
 }
